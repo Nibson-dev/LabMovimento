@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Canvas } from '@react-three/fiber';
-import { BlockMath } from 'react-katex';
+import SafeMath from './components/SafeMath';  // ✅ NOVO: SafeMath em vez de BlockMath
 import * as THREE from 'three';
 import toast, { Toaster } from 'react-hot-toast';
 import { THEME } from './theme';
@@ -46,12 +46,11 @@ const VectorLegend = ({ show, activeModel, hasFriction }) => {
 export default function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   
-  // EFEITO PARA FORÇAR CARREGAMENTO DO KATEX NO DEPLOY
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     
-    // Injeção dinâmica do CSS do KaTeX
+    // ✅ Carregamento do KaTeX CSS (mantém igual)
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css';
@@ -68,18 +67,26 @@ export default function App() {
   const [leftHudOpen, setLeftHudOpen] = useState(!isMobile);
   const [rightHudOpen, setRightHudOpen] = useState(!isMobile);
   const [gravity, setGravity] = useState(9.8);
-  const [y0, setY0] = useState(0); const [v0, setV0] = useState(20); 
-  const [s0, setS0] = useState(0); const [a, setA] = useState(-2); 
-  const [mass, setMass] = useState(10); const [angle, setAngle] = useState(30); 
-  const [muStatic, setMuStatic] = useState(0.5); const [muKinetic, setMuKinetic] = useState(0.3); 
+  const [y0, setY0] = useState(0);
+  const [v0, setV0] = useState(20); 
+  const [s0, setS0] = useState(0);
+  const [a, setA] = useState(-2); 
+  const [mass, setMass] = useState(10);
+  const [angle, setAngle] = useState(30); 
+  const [muStatic, setMuStatic] = useState(0.5);
+  const [muKinetic, setMuKinetic] = useState(0.3); 
   const [playbackSpeed, setPlaybackSpeed] = useState(1); 
   const [manualProgress, setManualProgress] = useState(0); 
   const [showVectors, setShowVectors] = useState(true);
-  const [viewMode, setViewMode] = useState('3D'); 
+  const [viewMode, setViewMode] = useState('3D');
+  
+  // ✅ NOVO: Estado para debug de LaTeX
+  const [latexErrors, setLatexErrors] = useState([]);
 
   const clearSimulation = () => {
     setData(null);
     if (!useGhost) setGhostData(null);
+    setLatexErrors([]);  // ✅ Limpa erros
   };
 
   const takeScreenshot = () => {
@@ -97,10 +104,15 @@ export default function App() {
     if (mass <= 0 && activeModel === 'inclined_plane') return toast.error('A massa deve ser maior que zero!');
     if (angle < 0 || angle > 89) return toast.error('O ângulo deve estar entre 0º e 89º!');
 
-    if (useGhost && data) { setGhostData(data.simulation_data); } 
-    else if (!useGhost) { setGhostData(null); }
+    if (useGhost && data) { 
+      setGhostData(data.simulation_data); 
+    } else if (!useGhost) { 
+      setGhostData(null); 
+    }
 
     setLoading(true);
+    setLatexErrors([]);  // ✅ Reseta erros
+    
     let params = { gravity: parseFloat(gravity) };
     if (activeModel === 'vertical_motion') params = { ...params, y0: parseFloat(y0), v0: parseFloat(v0) };
     else if (activeModel === 'inclined_plane') params = { ...params, mass: parseFloat(mass), angle: parseFloat(angle), mu_s_val: parseFloat(muStatic), mu_k_val: parseFloat(muKinetic) };
@@ -108,7 +120,10 @@ export default function App() {
     else if (activeModel === 'horizontal_mruv') params = { s0: parseFloat(s0), v0: parseFloat(v0), a: parseFloat(a) };
 
     try {
-      const response = await axios.post('https://labengine.onrender.com/api/simulate', { model_type: activeModel, parameters: params });
+      const response = await axios.post('https://labengine.onrender.com/api/simulate', { 
+        model_type: activeModel, 
+        parameters: params 
+      });
       setData(response.data);
       setPlaybackSpeed(1);
       if (!isMobile) setRightHudOpen(true); 
@@ -158,7 +173,7 @@ export default function App() {
         body, html, #root { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; font-family: 'Inter', sans-serif; } 
         * { box-sizing: border-box; } 
         
-        /* CORREÇÃO DO KATEX (FÓRMULAS) */
+        /* ✅ CORREÇÃO DO KATEX (FÓRMULAS) */
         .katex-display { margin: 12px 0; overflow-x: auto; color: #00e5ff !important; }
         .katex { color: white !important; font-size: 1.1em !important; }
         .katex .base { margin: 4px 0; }
@@ -299,6 +314,19 @@ export default function App() {
               <h2 style={{ fontSize: '14px', color: '#888', textTransform: 'uppercase', margin: 0 }}>Engenharia Reversa</h2>
               <button onClick={() => setRightHudOpen(false)} style={closeBtnStyle}>✕</button>
             </div>
+            
+            {/* ✅ DEBUG OPCIONAL: Mostrar erros de LaTeX em desenvolvimento */}
+            {latexErrors.length > 0 && process.env.NODE_ENV === 'development' && (
+              <div style={{ background: 'rgba(255,68,68,0.1)', border: '1px solid #ff4444', padding: '10px', borderRadius: '8px', marginBottom: '16px', fontSize: '11px', color: '#ff8888' }}>
+                <strong>⚠️ {latexErrors.length} erro(s) de LaTeX</strong>
+                {latexErrors.map((err, i) => (
+                  <div key={i} style={{ marginTop: '4px', fontSize: '10px' }}>
+                    Step {err.step}: {err.message}
+                  </div>
+                ))}
+              </div>
+            )}
+            
             <div style={{ flex: 1 }}>
               {data.explanation_steps.map(step => (
                 <div key={step.step} style={{ marginBottom: '28px' }}>
@@ -308,31 +336,19 @@ export default function App() {
                   </div>
                   <p style={{ fontSize: '13px', color: '#AAA', margin: '0 0 14px 34px' }}>{step.text}</p>
                   <div style={{ marginLeft: '34px', background: '#050505', padding: '16px', borderRadius: '10px', border: '1px solid #222' }}>
-                   <BlockMath 
-  math={
-    (step.equation_latex || "")
-
-      // 💥 remove TODOS caracteres unicode estranhos
-      .replace(/[\u0300-\u036f]/g, "") // remove acentos/combining
-
-      // 💥 remove qualquer coisa que não seja ASCII básico ou comandos úteis
-      .replace(/[^a-zA-Z0-9\\{}().,+\-*/= _^]/g, "")
-
-      // 💥 remove comandos desconhecidos (mata \tmspace, \t, etc)
-      .replace(/\\(?!sin|cos|tan|cdot|theta|frac|sqrt|left|right)[a-zA-Z]+/g, "")
-
-      // 💥 limpa espaços quebrados
-      .replace(/\s+/g, " ")
-
-      .trim()
-  } 
-  renderError={(error) => (
-    <div style={{ color: '#ff4444', background: '#330000', padding: '10px', borderRadius: '8px', border: '1px solid red', marginTop: '10px' }}>
-      <strong>🚨 ERRO KaTeX:</strong><br/>
-      <span style={{fontFamily: 'monospace'}}>{error.message}</span>
-    </div>
-  )} 
-/>
+                    {/* ✅ NOVO: SafeMath em vez de BlockMath */}
+                    <SafeMath 
+                      equation={step.equation_latex}
+                      fallback="placeholder"
+                      debug={process.env.NODE_ENV === 'development'}
+                      onError={(error) => {
+                        // Log opcional para debug
+                        console.warn(`LaTeX error in step ${step.step}:`, error);
+                        if (process.env.NODE_ENV === 'development') {
+                          setLatexErrors(prev => [...prev, { step: step.step, message: error.error.message }]);
+                        }
+                      }}
+                    />
                   </div>
                 </div>
               ))}
