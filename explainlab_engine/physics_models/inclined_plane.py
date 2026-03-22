@@ -19,7 +19,7 @@ Uso:
 
 import math
 from typing import Dict, List, Any
-from latex_converter import sympy_to_katex, create_safe_equation
+from ..utils.latex_converter import sympy_to_katex, create_safe_equation
 
 
 class InclinedPlane:
