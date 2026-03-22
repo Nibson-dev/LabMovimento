@@ -1,72 +1,68 @@
-import sympy as sp 
-from .base_model import BaseModel
 import math
+from .base_model import BaseModel
 
 class InclinedPlane(BaseModel):
     def solve(self, mass, angle, mu_s_val, mu_k_val, gravity=9.8):
-        
+
         angle_rad = math.radians(angle)
-        
+
+        # Forças básicas
         weight = mass * gravity
         normal_force = weight * math.cos(angle_rad)
         px = weight * math.sin(angle_rad)
-        
+
+        # Atrito
         max_static_friction = mu_s_val * normal_force
-        
         is_moving = px > max_static_friction
-        
+
         if is_moving:
             friction_force = mu_k_val * normal_force
             net_force = px - friction_force
             acceleration = net_force / mass
-            status_text = "A componente Px e maior que o atrito estatico maximo. O bloco desce acelerando."
+            status_text = "A componente Px supera o atrito estático máximo. O bloco desce acelerando."
         else:
-            friction_force = px 
+            friction_force = px
             net_force = 0.0
             acceleration = 0.0
-            status_text = "A componente Px nao supera o atrito estatico. O bloco permanece em repouso."
+            status_text = "A componente Px não supera o atrito estático. O bloco permanece em repouso."
 
-        # 🔥 LATEX 100% SEGURO PRA API (ESCAPE DUPLO)
-        eq1 = f"P_x = P \\\\cdot \\\\sin(\\\\theta) = {px:.2f}\\\\,\\\\mathrm{{N}} \\\\quad N = P \\\\cdot \\\\cos(\\\\theta) = {normal_force:.2f}\\\\,\\\\mathrm{{N}}"
-        
-        eq2 = f"F_{{at}} = mu \\\\cdot N = {friction_force:.2f}\\\\,\\\\mathrm{{N}}"
-        
-        eq3 = f"F_R = P_x - F_{{at}} = m \\\\cdot a \\\\Rightarrow a = {acceleration:.2f}\\\\,\\\\mathrm{{m/s^2}}"
-
+        # 🔥 STEPS 100% SAFE PRA KATEX
         steps = [
             {
                 "step": 1,
-                "title": "Decomposicao do Peso",
-                "text": "O peso (P = mg) e decomposto nos eixos paralelo (Px) e perpendicular (Normal) a rampa.",
-                "equation_latex": eq1
+                "title": "Decomposição do Peso",
+                "text": f"O peso total é {weight:.2f} N. Decompomos em paralelo (Px) e normal (N).",
+                "equation_latex": f"P_x = {px:.2f} \\, \\mathrm{{N}} \\quad N = {normal_force:.2f} \\, \\mathrm{{N}}"
             },
             {
                 "step": 2,
-                "title": "Analise do Atrito",
-                "text": f"Atrito estatico maximo: {max_static_friction:.2f}N. {status_text}",
-                "equation_latex": eq2
+                "title": "Análise do Atrito",
+                "text": f"Atrito máximo: {max_static_friction:.2f} N. {status_text}",
+                "equation_latex": f"F_{{at}} = {friction_force:.2f} \\, \\mathrm{{N}}"
             }
         ]
-        
+
         if is_moving:
             steps.append({
                 "step": 3,
                 "title": "Segunda Lei de Newton",
-                "text": "Calculamos a forca resultante e a aceleracao do bloco.",
-                "equation_latex": eq3
+                "text": "Aplicamos a dinâmica para encontrar a aceleração.",
+                "equation_latex": f"a = {acceleration:.2f} \\, \\mathrm{{m/s^2}}"
             })
 
+        # 🎬 SIMULAÇÃO
         ramp_length = 15.0
         num_frames = 60
-        
+
         time_array = []
         position_s_array = []
         velocity_v_array = []
-        
+
         if is_moving and acceleration > 0:
             total_time = math.sqrt((2 * ramp_length) / acceleration)
+
             time_array = [round((total_time / num_frames) * i, 3) for i in range(num_frames + 1)]
-            
+
             for t in time_array:
                 pos = 0.5 * acceleration * t**2
                 vel = acceleration * t
