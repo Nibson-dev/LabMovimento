@@ -78,8 +78,9 @@ class LatexConverter:
     def _normalize_spacing(latex: str) -> str:
         clean = latex
         clean = LatexConverter.MULTIPLE_SPACES_PATTERN.sub(' ', clean)
-        clean = re.sub(r'\s*\\left\s*', '\\left', clean)
-        clean = re.sub(r'\s*\\right\s*', '\\right', clean)
+        # CORREÇÃO AQUI: 'r' antes das strings de substituição para blindar o \l e \r
+        clean = re.sub(r'\s*\\left\s*', r'\\left', clean)
+        clean = re.sub(r'\s*\\right\s*', r'\\right', clean)
         clean = clean.replace(r'\,', r'\,').replace(r'\;', r'\;')
         return clean
     
