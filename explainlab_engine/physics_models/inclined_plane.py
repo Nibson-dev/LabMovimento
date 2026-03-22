@@ -1,13 +1,8 @@
 import math
 from typing import Dict, Any
-from explainlab_engine.utils.latex_converter import sympy_to_katex
+from .base_model import BaseModel
 
-class InclinedPlane:
-    """
-    Simulação de plano inclinado com atrito.
-    Gera equações LaTeX 100% compatíveis com KaTeX.
-    """
-    
+class InclinedPlane(BaseModel):
     def solve(
         self, 
         mass: float, 
@@ -38,40 +33,19 @@ class InclinedPlane:
             acceleration = 0.0
             status_text = "A componente Px não supera o atrito estático. O bloco permanece em repouso."
         
-        # ========== EQUAÇÕES (SEGURAS PARA KATEX) ==========
+        # ========== EQUAÇÕES PURAS E BLINDADAS ==========
+        # Usando 'r' (Raw String) e espaços normais. Zero SymPy, Zero Conversor.
         
-        eq1_text = (
-            f"P = {weight:.2f} \\, \\mathrm{{N}} \\quad "
-            f"P_x = {px:.2f} \\, \\mathrm{{N}} \\quad "
-            f"N = {normal_force:.2f} \\, \\mathrm{{N}}"
-        )
+        eq1_text = rf"P = {weight:.2f}\text{{ N}} \quad P_x = {px:.2f}\text{{ N}} \quad N = {normal_force:.2f}\text{{ N}}"
         
-        eq2_text = (
-            f"F_{{at,max}} = \\mu_s \\cdot N = {mu_s_val} \\cdot {normal_force:.2f} "
-            f"= {max_static_friction:.2f} \\, \\mathrm{{N}}"
-        )
+        eq2_text = rf"F_{{at,max}} = \mu_s \cdot N = {mu_s_val} \cdot {normal_force:.2f} = {max_static_friction:.2f}\text{{ N}}"
         
         if is_moving:
-            eq3_text = (
-                f"P_x > F_{{at,max}} \\quad "
-                f"({px:.2f} > {max_static_friction:.2f}) \\quad "
-                f"\\Rightarrow \\text{{Bloco se move}}"
-            )
-            eq4_text = (
-                f"a = \\frac{{P_x - F_{{at}}}}{{m}} = "
-                f"\\frac{{{px:.2f} - {friction_force:.2f}}}{{{mass}}} "
-                f"= {acceleration:.2f} \\, \\mathrm{{m/s^2}}"
-            )
+            eq3_text = rf"P_x > F_{{at,max}} \quad ({px:.2f} > {max_static_friction:.2f}) \quad \Rightarrow \text{{ Bloco se move}}"
+            eq4_text = rf"a = \frac{{P_x - F_{{at}}}}{{m}} = \frac{{{px:.2f} - {friction_force:.2f}}}{{{mass}}} = {acceleration:.2f}\text{{ m/s}}^2"
         else:
-            eq3_text = (
-                f"P_x \\leq F_{{at,max}} \\quad "
-                f"({px:.2f} \\leq {max_static_friction:.2f}) \\quad "
-                f"\\Rightarrow \\text{{Bloco travado}}"
-            )
-            eq4_text = (
-                f"a = 0 \\, \\mathrm{{m/s^2}} \\quad "
-                f"\\text{{(bloco em repouso)}}"
-            )
+            eq3_text = rf"P_x \leq F_{{at,max}} \quad ({px:.2f} \leq {max_static_friction:.2f}) \quad \Rightarrow \text{{ Bloco travado}}"
+            eq4_text = rf"a = 0\text{{ m/s}}^2 \quad \text{{(bloco em repouso)}}"
         
         # ========== BUILD STEPS ==========
         steps = [
@@ -79,19 +53,19 @@ class InclinedPlane:
                 "step": 1,
                 "title": "Decomposição do Peso",
                 "text": f"O peso total é {weight:.2f} N. Decomposto em componentes paralela (Px) e normal (N).",
-                "equation_latex": sympy_to_katex(eq1_text)  
+                "equation_latex": eq1_text  
             },
             {
                 "step": 2,
                 "title": "Limite de Atrito Estático",
                 "text": f"Atrito estático máximo possível: {max_static_friction:.2f} N. Agora comparamos com Px.",
-                "equation_latex": sympy_to_katex(eq2_text)  
+                "equation_latex": eq2_text  
             },
             {
                 "step": 3,
                 "title": "Análise de Movimento",
                 "text": status_text,
-                "equation_latex": sympy_to_katex(eq3_text)  
+                "equation_latex": eq3_text  
             }
         ]
         
@@ -100,7 +74,7 @@ class InclinedPlane:
                 "step": 4,
                 "title": "Segunda Lei de Newton",
                 "text": "Como Px > Fatrito_max, o bloco se move com aceleração constante.",
-                "equation_latex": sympy_to_katex(eq4_text)  
+                "equation_latex": eq4_text  
             })
         
         # ========== SIMULAÇÃO ==========
