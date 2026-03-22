@@ -2,7 +2,10 @@ import math
 from typing import Dict, Any
 
 class InclinedPlane:
-    """Simulação de plano inclinado com atrito. LaTeX elegante e nativo."""
+    """
+    Simulação de plano inclinado com atrito.
+    Matemática Unicode: 100% à prova de bugs do KaTeX (Sem barras invertidas!)
+    """
     
     def solve(self, mass: float, angle: float, mu_s_val: float, mu_k_val: float, gravity: float = 9.8) -> Dict[str, Any]:
         
@@ -27,17 +30,20 @@ class InclinedPlane:
             acceleration = 0.0
             status_text = "A componente Px não supera o atrito estático. O bloco permanece em repouso."
         
-        # ========== EQUAÇÕES (PADRÃO OURO LATEX) ==========
-        eq1_text = rf"P = {weight:.2f} \, \mathrm{{N}} \quad P_x = {px:.2f} \, \mathrm{{N}} \quad N = {normal_force:.2f} \, \mathrm{{N}}"
+        # ========== EQUAÇÕES UNICODE (A BALA DE PRATA) ==========
+        # NENHUMA barra invertida! Usamos vírgulas, μ, ·, ⇒, ≤ e (A / B).
+        # O KaTeX vai ler isso sorrindo e não vai engasgar!
         
-        eq2_text = rf"F_{{at,max}} = \mu_s \cdot N = {mu_s_val} \cdot {normal_force:.2f} = {max_static_friction:.2f} \, \mathrm{{N}}"
+        eq1_text = f"P = {weight:.2f} N,   P_x = {px:.2f} N,   N = {normal_force:.2f} N"
+        
+        eq2_text = f"F_{{at,max}} = μ_s · N = {mu_s_val} · {normal_force:.2f} = {max_static_friction:.2f} N"
         
         if is_moving:
-            eq3_text = rf"P_x > F_{{at,max}} \quad \Rightarrow \quad {px:.2f} > {max_static_friction:.2f}"
-            eq4_text = rf"a = \frac{{P_x - F_{{at}}}}{{m}} = \frac{{{px:.2f} - {friction_force:.2f}}}{{{mass}}} = {acceleration:.2f} \, \mathrm{{m/s^2}}"
+            eq3_text = f"P_x > F_{{at,max}}   ⇒   {px:.2f} > {max_static_friction:.2f}"
+            eq4_text = f"a = (P_x - F_{{at}}) / m = ({px:.2f} - {friction_force:.2f}) / {mass} = {acceleration:.2f} m/s^2"
         else:
-            eq3_text = rf"P_x \leq F_{{at,max}} \quad \Rightarrow \quad {px:.2f} \leq {max_static_friction:.2f}"
-            eq4_text = rf"a = 0 \, \mathrm{{m/s^2}}"
+            eq3_text = f"P_x ≤ F_{{at,max}}   ⇒   {px:.2f} ≤ {max_static_friction:.2f}"
+            eq4_text = f"a = 0 m/s^2"
         
         # ========== BUILD STEPS ==========
         steps = [
