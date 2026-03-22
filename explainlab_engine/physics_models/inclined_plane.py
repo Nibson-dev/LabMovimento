@@ -26,6 +26,7 @@ class InclinedPlane(BaseModel):
             acceleration = 0.0
             status_text = "A componente Px nao supera o atrito estatico. O bloco permanece em repouso."
 
+        # 3. Engenharia Reversa (LaTeX)
         steps = [
             {
                 "step": 1, "title": "Decomposição do Peso",
