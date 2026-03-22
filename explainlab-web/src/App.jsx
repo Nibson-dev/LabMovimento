@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Canvas } from '@react-three/fiber';
-import 'katex/dist/katex.min.css';
 import { BlockMath } from 'react-katex';
 import * as THREE from 'three';
 import toast, { Toaster } from 'react-hot-toast';
