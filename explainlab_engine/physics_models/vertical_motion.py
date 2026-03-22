@@ -6,10 +6,8 @@ class VerticalMotion(BaseModel):
     def solve(self, y0, v0, gravity=9.8):
         t = sp.Symbol('t')
         
-        # 1. Equações
         eq_pos = y0 + v0 * t - 0.5 * gravity * t**2
         
-        # 2. Tempo de Voo (Bhaskara)
         a = -0.5 * gravity
         b = v0
         c = y0
@@ -22,7 +20,6 @@ class VerticalMotion(BaseModel):
             t2 = (-b - math.sqrt(delta)) / (2 * a)
             flight_time = max(t1, t2)
             
-        # 3. Ápice
         if v0 > 0:
             t_up = v0 / gravity
             max_h = y0 + (v0**2) / (2 * gravity)
@@ -30,26 +27,24 @@ class VerticalMotion(BaseModel):
             t_up = 0.0
             max_h = y0
             
-        # 4. Passos para o Frontend
         steps = [
             {
                 "step": 1, "title": "Equação da Trajetória",
                 "text": "O movimento é um MRUV sob ação exclusiva da gravidade.",
-                "equation_latex": f"y(t) = y_0 + v_0 t - \\frac{{g t^2}}{{2}} = {y0} + {v0}t - {0.5*gravity}t^2"
+                "equation_latex": rf"y(t) = y_0 + v_0 t - \frac{{g t^2}}{{2}} = {y0} + {v0}t - {0.5*gravity}t^2"
             },
             {
                 "step": 2, "title": "Equação da Velocidade",
                 "text": "A velocidade é a derivada da posição. Ela inverte o sentido no topo.",
-                "equation_latex": f"v(t) = v_0 - gt = {v0} - {gravity}t"
+                "equation_latex": rf"v(t) = v_0 - gt = {v0} - {gravity}t"
             },
             {
                 "step": 3, "title": "Análise de Ápice (H_max)",
                 "text": "O projétil atinge a altura máxima quando v(t) = 0.",
-                "equation_latex": f"t_{{subida}} = {t_up:.2f}\\text{{ s}} \\quad \\Rightarrow \\quad H_{{max}} = {max_h:.2f}\\text{{ m}}"
+                "equation_latex": rf"t_{{subida}} = {t_up:.2f} \text{{ s}} \quad \Rightarrow \quad H_{{max}} = {max_h:.2f} \text{{ m}}"
             }
         ]
         
-        # 5. Arrays de Animação
         num_frames = 40
         if flight_time <= 0:
             time_array = [0, 1, 2]
