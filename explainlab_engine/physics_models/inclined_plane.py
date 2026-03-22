@@ -4,7 +4,7 @@ from typing import Dict, Any
 class InclinedPlane:
     """
     Simulação de plano inclinado com atrito.
-    Gera equações LaTeX 100% compatíveis com KaTeX usando matemática pura.
+    Gera equações LaTeX 100% à prova de falhas usando '~' para espaçamento.
     """
     
     def solve(
@@ -38,19 +38,19 @@ class InclinedPlane:
             status_text = "A componente Px não supera o atrito estático. O bloco permanece em repouso."
         
         # ========== EQUAÇÕES PURAS E BLINDADAS ==========
-        # Usando apenas matemática pura. ZERO palavras, ZERO \text ou \mathrm.
-        # Usamos \, para dar um pequeno espaço antes das unidades (N e m/s^2).
+        # Usamos rf"..." para o Python não dar erro nas barras invertidas.
+        # Usamos o TIL (~) para espaços. É 100% à prova de falhas no KaTeX.
         
-        eq1_text = rf"P = {weight:.2f}\,N \quad P_x = {px:.2f}\,N \quad N = {normal_force:.2f}\,N"
+        eq1_text = rf"P = {weight:.2f}~N ~~~~~ P_x = {px:.2f}~N ~~~~~ N = {normal_force:.2f}~N"
         
-        eq2_text = rf"F_{{at,max}} = \mu_s \cdot N = {mu_s_val} \cdot {normal_force:.2f} = {max_static_friction:.2f}\,N"
+        eq2_text = rf"F_{{at,max}} = \mu_s \cdot N = {mu_s_val} \cdot {normal_force:.2f} = {max_static_friction:.2f}~N"
         
         if is_moving:
-            eq3_text = rf"P_x > F_{{at,max}} \quad \Rightarrow \quad {px:.2f} > {max_static_friction:.2f}"
-            eq4_text = rf"a = \frac{{P_x - F_{{at}}}}{{m}} = \frac{{{px:.2f} - {friction_force:.2f}}}{{{mass}}} = {acceleration:.2f}\,m/s^2"
+            eq3_text = rf"P_x > F_{{at,max}} ~~~ \Rightarrow ~~~ {px:.2f} > {max_static_friction:.2f}"
+            eq4_text = rf"a = \frac{{P_x - F_{{at}}}}{{m}} = \frac{{{px:.2f} - {friction_force:.2f}}}{{{mass}}} = {acceleration:.2f}~m/s^2"
         else:
-            eq3_text = rf"P_x \leq F_{{at,max}} \quad \Rightarrow \quad {px:.2f} \leq {max_static_friction:.2f}"
-            eq4_text = rf"a = 0\,m/s^2"
+            eq3_text = rf"P_x \leq F_{{at,max}} ~~~ \Rightarrow ~~~ {px:.2f} \leq {max_static_friction:.2f}"
+            eq4_text = rf"a = 0~m/s^2"
         
         # ========== BUILD STEPS ==========
         steps = [
