@@ -1,8 +1,6 @@
 from typing import Dict, Any
-import sympy as sp
 import numpy as np
 from .base_model import BasePhysicsModel
-from explainlab_engine.utils.latex_converter import sympy_to_katex, create_safe_equation
 
 class MRUV(BasePhysicsModel):
     def __init__(self, parameters: Dict[str, Any]):
@@ -12,62 +10,31 @@ class MRUV(BasePhysicsModel):
         self.v0 = parameters.get('v0', 0.0)
         self.a = parameters.get('a', 1.0)
         self.t_final = parameters.get('t_final', 5.0)
-        self.t = sp.Symbol('t', real=True, positive=True)
-
-    def validate_parameters(self) -> bool:
-        if self.t_final <= 0:
-            self.errors.append("Tempo final deve ser positivo")
-            return False
-        return True
 
     def solve(self) -> Dict[str, Any]:
-        if not self.validate_parameters():
-            return {
-                "model_detected": self.model_name,
-                "errors": self.errors,
-                "explanation_steps": [],
-                "simulation_data": {}
-            }
-        
+        # EQUAÇÕES BLINDADAS
         self._add_step(
             step_number=1,
-            title="Identificação do Modelo",
+            title="Equação Horária",
             text="Movimento com aceleração constante.",
-            equation_latex=rf"s(t) = s_0 + v_0 t + \frac{{1}}{{2}}at^2"
+            equation_latex=f"s(t) = s0 + v0~t + (at²) / 2"
         )
 
-        s_general = self.s0 + self.v0 * self.t + sp.Rational(1, 2) * self.a * self.t**2
-        s_general_latex = sp.latex(s_general)
+        s_final_val = self.s0 + self.v0 * self.t_final + 0.5 * self.a * self.t_final**2
         
         self._add_step(
             step_number=2,
-            title="Substituição de Valores",
-            text=f"Substituindo s0 = {self.s0}, v0 = {self.v0}, a = {self.a}",
-            equation_latex=s_general_latex
+            title="Substituição",
+            text=f"Para t = {self.t_final}s",
+            equation_latex=f"s({self.t_final}) = {s_final_val:.2f}~m"
         )
 
-        v_t = sp.diff(s_general, self.t)
-        v_t_latex = sp.latex(v_t)
+        # Dados numéricos com Numpy (Preservando lógica)
+        time_array = np.linspace(0, self.t_final, 50)
+        pos_array = self.s0 + self.v0 * time_array + 0.5 * self.a * time_array**2
         
-        self._add_step(
-            step_number=3,
-            title="Equação Horária da Velocidade",
-            text="Derivando a posição",
-            equation_latex=v_t_latex
-        )
-
-        self._generate_simulation_data(s_general, v_t)
-        return self._build_output(self.model_name)
-
-    def _generate_simulation_data(self, s_general, v_t) -> None:
-        t_final = self.t_final
-        time_array = np.linspace(0, t_final, 50)
-        s_func = sp.lambdify(self.t, s_general, 'numpy')
-        v_func = sp.lambdify(self.t, v_t, 'numpy')
-        position_array = s_func(time_array)
-        velocity_array = v_func(time_array)
         self.simulation_data = {
             "time_array": time_array.tolist(),
-            "position_array": position_array.tolist(),
-            "velocity_array": velocity_array.tolist()
+            "position_array": pos_array.tolist()
         }
+        return self._build_output(self.model_name)

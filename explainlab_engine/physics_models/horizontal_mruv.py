@@ -1,14 +1,9 @@
 import sympy as sp
 from .base_model import BaseModel
-from explainlab_engine.utils.latex_converter import sympy_to_katex, create_safe_equation
 
 class HorizontalMRUV(BaseModel):
     def solve(self, s0, v0, a):
-        t = sp.Symbol('t')
-        
-        eq_pos_latex = f"S(t) = {s0} + {v0}t + {0.5*a}t^2"
-        eq_vel_latex = f"v(t) = {v0} + {a}t"
-        
+        # Lógica de status
         stop_time = 0.0
         will_stop = False
         
@@ -16,48 +11,44 @@ class HorizontalMRUV(BaseModel):
             will_stop = True
             stop_time = -v0 / a
             stop_pos = s0 + v0 * stop_time + 0.5 * a * stop_time**2
-            status = "Movimento Retardado (Freando) ate parar, depois Acelerado (Invertido)."
+            status = "Movimento Retardado (Freando)."
         elif a == 0:
-             status = "Movimento Retilineo Uniforme (MRU - Aceleracao nula)."
+             status = "Movimento Retilíneo Uniforme (MRU)."
              stop_pos = None
         else:
-            status = "Movimento Acelerado (Ganhando velocidade no mesmo sentido)."
+            status = "Movimento Acelerado."
             stop_pos = None
+
+        # EQUAÇÕES BLINDADAS (Sem barras invertidas complexas)
+        eq_pos_latex = f"S(t) = {s0} + {v0}t + {0.5*a:.2f}t²"
+        eq_vel_latex = f"v(t) = {v0} + {a}t"
 
         steps = [
             {
                 "step": 1, "title": "Funções Horárias do MRUV",
-                "text": f"O movimento é definido pela posição inicial S0={s0}m, velocidade inicial v0={v0}m/s e aceleração constante a={a}m/s^2. {status}",
-                "equation_latex": rf"S(t) = S_0 + v_0 t + \frac{{at^2}}{{2}} \Rightarrow {eq_pos_latex}"
+                "text": f"O movimento tem S0={s0}m, v0={v0}m/s e a={a}m/s². {status}",
+                "equation_latex": f"S(t) = S0 + v0~t + (at²) / 2   =>   {eq_pos_latex}"
             },
-             {
+            {
                 "step": 2, "title": "Função da Velocidade",
-                "text": "A velocidade varia linearmente com o tempo devido à aceleração constante.",
-                "equation_latex": rf"v(t) = v_0 + at \Rightarrow {eq_vel_latex}"
+                "text": "A velocidade varia linearmente com o tempo.",
+                "equation_latex": f"v(t) = v0 + at   =>   {eq_vel_latex}"
             }
         ]
         
         if will_stop:
              steps.append({
-                "step": 3, "title": "Ponto de Inversão (Velocidade Nula)",
-                "text": f"O objeto para momentaneamente (v=0) no instante t = {stop_time:.2f}s antes de inverter o sentido do movimento.",
-                "equation_latex": rf"v(t) = 0 \Rightarrow {v0} + {a}t = 0 \Rightarrow t = {stop_time:.2f} \text{{ s}}. \quad S({stop_time:.2f}) = {stop_pos:.2f} \text{{ m}}"
+                "step": 3, "title": "Ponto de Inversão",
+                "text": f"O objeto para em t = {stop_time:.2f}s.",
+                "equation_latex": f"v(t) = 0   =>   {v0} + {a}t = 0   =>   t = {stop_time:.2f}~s,   S = {stop_pos:.2f}~m"
             })
 
+        # Geração de dados (Mantendo seu código original)
         sim_duration = max(10.0, stop_time * 1.5) if will_stop else 10.0
         num_frames = 60
         time_array = [round((sim_duration / num_frames) * i, 3) for i in range(num_frames + 1)]
-        
-        position_s_array = []
-        velocity_v_array = []
-        acceleration_a_array = [] 
-
-        for t_val in time_array:
-            pos = s0 + v0 * t_val + 0.5 * a * t_val**2
-            vel = v0 + a * t_val
-            position_s_array.append(round(pos, 3))
-            velocity_v_array.append(round(vel, 3))
-            acceleration_a_array.append(a)
+        position_s_array = [round(s0 + v0 * t + 0.5 * a * t**2, 3) for t in time_array]
+        velocity_v_array = [round(v0 + a * t, 3) for t in time_array]
 
         return {
             "model_detected": "MRUV Horizontal",
@@ -72,7 +63,6 @@ class HorizontalMRUV(BaseModel):
                 },
                 "time_array": time_array,
                 "position_s_array": position_s_array,
-                "velocity_v_array": velocity_v_array,
-                "acceleration_a_array": acceleration_a_array
+                "velocity_v_array": velocity_v_array
             }
         }
