@@ -1,4 +1,4 @@
-import sympy as sp
+import sympy as sp 
 from .base_model import BaseModel
 import math
 
@@ -19,33 +19,35 @@ class InclinedPlane(BaseModel):
             friction_force = mu_k_val * normal_force
             net_force = px - friction_force
             acceleration = net_force / mass
-            status_text = "A componente Px e maior que o atrito estatico maximo. O bloco desce acelerando."
+            status_text = "A componente Px é maior que o atrito estático máximo. O bloco desce acelerando."
         else:
             friction_force = px 
             net_force = 0.0
             acceleration = 0.0
-            status_text = "A componente Px nao supera o atrito estatico. O bloco permanece em repouso."
+            status_text = "A componente Px não supera o atrito estático. O bloco permanece em repouso."
 
-        # 3. Engenharia Reversa (LaTeX)
+        # Engenharia Reversa (LaTeX CORRIGIDO)
         steps = [
             {
-                "step": 1, "title": "Decomposição do Peso",
-                "text": f"O peso (P = mg = {weight:.2f}N) é decomposto nos eixos paralelo (Px) e perpendicular (Py/Normal) à rampa.",
-                # ZERO \text ou \sin! Apenas física pura e blindada.
-                "equation_latex": rf"P_x = P \cdot sen(\theta) = {px:.2f} N \quad | \quad N = P \cdot cos(\theta) = {normal_force:.2f} N"
+                "step": 1,
+                "title": "Decomposição do Peso",
+                "text": f"O peso (P = mg = {weight:.2f}N) é decomposto nos eixos paralelo (Px) e perpendicular (Normal) à rampa.",
+                "equation_latex": rf"P_x = P \cdot \sin(\theta) = {px:.2f}\,\text{{N}} \quad \mid \quad N = P \cdot \cos(\theta) = {normal_force:.2f}\,\text{{N}}"
             },
             {
-                "step": 2, "title": "Análise do Atrito",
+                "step": 2,
+                "title": "Análise do Atrito",
                 "text": f"Atrito Estático Máximo: {max_static_friction:.2f}N. {status_text}",
-                "equation_latex": rf"F_{{at}} = \mu \cdot N = {friction_force:.2f} N"
+                "equation_latex": rf"F_{{at}} = \mu \cdot N = {friction_force:.2f}\,\text{{N}}"
             }
         ]
         
         if is_moving:
             steps.append({
-                "step": 3, "title": "Segunda Lei de Newton",
+                "step": 3,
+                "title": "Segunda Lei de Newton",
                 "text": "Calculamos a força resultante e a aceleração do bloco.",
-                "equation_latex": rf"F_R = P_x - F_{{at}} = m \cdot a \Rightarrow a = {acceleration:.2f} m/s^2"
+                "equation_latex": rf"F_R = P_x - F_{{at}} = m \cdot a \Rightarrow a = {acceleration:.2f}\,\text{{m/s}}^2"
             })
 
         ramp_length = 15.0
