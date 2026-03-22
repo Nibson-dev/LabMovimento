@@ -13,20 +13,15 @@ from enum import Enum
 
 class LatexCompatibility(Enum):
     """Níveis de compatibilidade KaTeX"""
-    FULL = "full"          # Renderiza perfeitamente
-    PARTIAL = "partial"    # Renderiza mas pode ter diferenças
-    DEGRADED = "degraded"  # Renderiza com fallback
-    INCOMPATIBLE = "incompatible"  # Não renderiza
+    FULL = "full"          
+    PARTIAL = "partial"    
+    DEGRADED = "degraded"  
+    INCOMPATIBLE = "incompatible"  
 
 
 class LatexConverter:
-    """
-    Conversor profissional de LaTeX SymPy → KaTeX
-    Whitelist de comandos KaTeX suportados:
-    https://katex.org/docs/supported.html
-    """
+    """Conversor profissional de LaTeX SymPy → KaTeX"""
     
-    # Comandos SymPy que NÃO funcionam em KaTeX
     INCOMPATIBLE_COMMANDS = {
         r'\tmspace': '',
         r'\mkern': '',
@@ -68,18 +63,15 @@ class LatexConverter:
     
     @staticmethod
     def _remove_corrupted_unicode(latex: str) -> str:
-        clean = re.sub(r'[\u0300-\u036F]', '', latex)
-        return clean
+        return re.sub(r'[\u0300-\u036F]', '', latex)
     
     @staticmethod
     def _replace_incompatible_commands(latex: str) -> str:
         """Substitui comandos SymPy por equivalentes KaTeX usando replace seguro"""
         clean = latex
-        
         for sympy_cmd, katex_cmd in LatexConverter.INCOMPATIBLE_COMMANDS.items():
-            # AQUI ESTÁ A CORREÇÃO: Usar .replace() evita o "bad escape \m" do Python 3.14!
+            # USANDO REPLACE PARA EVITAR O BUG DO \m NO PYTHON 3.14
             clean = clean.replace(sympy_cmd, katex_cmd)
-        
         return clean
     
     @staticmethod
@@ -150,9 +142,30 @@ class LatexConverter:
     def sympy_to_katex(sympy_latex: str) -> str:
         return LatexConverter.sanitize(sympy_latex)
 
+    @staticmethod
+    def create_safe_equation(latex: str, fallback: str = "Equação complexa") -> dict:
+        clean = LatexConverter.sanitize(latex)
+        is_valid, compat, issue = LatexConverter.validate(clean)
+        return {
+            "latex": clean,
+            "compatibility": compat.value,
+            "is_valid": is_valid,
+            "fallback": fallback,
+            "original_length": len(latex),
+            "sanitized_length": len(clean),
+            "issue": issue
+        }
+
+# ============================================
+# Funções Globais Exportadas
+# ============================================
+
 def sympy_to_katex(sympy_latex: str) -> str:
-    return LatexConverter.sanitize(sympy_latex)
+    return LatexConverter.sympy_to_katex(sympy_latex)
 
 def validate_latex(latex: str) -> bool:
     is_valid, _, _ = LatexConverter.validate(latex)
     return is_valid
+
+def create_safe_equation(latex: str, fallback: str = "Equação complexa") -> dict:
+    return LatexConverter.create_safe_equation(latex, fallback)
