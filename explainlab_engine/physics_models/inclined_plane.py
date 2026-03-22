@@ -26,19 +26,19 @@ class InclinedPlane(BaseModel):
             acceleration = 0.0
             status_text = "A componente Px nao supera o atrito estatico. O bloco permanece em repouso."
 
-        # Engenharia Reversa (KaTeX SAFE)
+        # Engenharia Reversa (100% KaTeX SAFE)
         steps = [
             {
                 "step": 1,
                 "title": "Decomposicao do Peso",
                 "text": f"O peso (P = mg = {weight:.2f}N) e decomposto nos eixos paralelo (Px) e perpendicular (Normal) a rampa.",
-                "equation_latex": rf"P_x = P \cdot \sin(\theta) = {px:.2f}\,\mathrm{{N}} \quad N = P \cdot \cos(\theta) = {normal_force:.2f}\,\mathrm{{N}}"
+                "equation_latex": f"P_x = P \\cdot \\sin(\\theta) = {px:.2f}\\,\\mathrm{{N}} \\quad N = P \\cdot \\cos(\\theta) = {normal_force:.2f}\\,\\mathrm{{N}}"
             },
             {
                 "step": 2,
                 "title": "Analise do Atrito",
                 "text": f"Atrito estatico maximo: {max_static_friction:.2f}N. {status_text}",
-                "equation_latex": rf"F_{{at}} = \mu \cdot N = {friction_force:.2f}\,\mathrm{{N}}"
+                "equation_latex": f"F_{{at}} = \\mu \\cdot N = {friction_force:.2f}\\,\\mathrm{{N}}"
             }
         ]
         
@@ -47,7 +47,7 @@ class InclinedPlane(BaseModel):
                 "step": 3,
                 "title": "Segunda Lei de Newton",
                 "text": "Calculamos a forca resultante e a aceleracao do bloco.",
-                "equation_latex": rf"F_R = P_x - F_{{at}} = m \cdot a \Rightarrow a = {acceleration:.2f}\,\mathrm{{m/s^2}}"
+                "equation_latex": f"F_R = P_x - F_{{at}} = m \\cdot a \\Rightarrow a = {acceleration:.2f}\\,\\mathrm{{m/s^2}}"
             })
 
         ramp_length = 15.0
