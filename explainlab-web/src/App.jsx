@@ -311,20 +311,20 @@ export default function App() {
                    <BlockMath 
   math={
     (step.equation_latex || "")
-      .normalize("NFKD")
 
-      // REMOVE COMANDOS PROBLEMÁTICOS ESPECÍFICOS
-      .replace(/\\tmspace\+?\{.*?\}\{.*?\}/g, "")
+      // 💥 remove TODOS caracteres unicode estranhos
+      .replace(/[\u0300-\u036f]/g, "") // remove acentos/combining
 
-      // REMOVE QUALQUER COMANDO DESCONHECIDO
+      // 💥 remove qualquer coisa que não seja ASCII básico ou comandos úteis
+      .replace(/[^a-zA-Z0-9\\{}().,+\-*/= _^]/g, "")
+
+      // 💥 remove comandos desconhecidos (mata \tmspace, \t, etc)
       .replace(/\\(?!sin|cos|tan|cdot|theta|frac|sqrt|left|right)[a-zA-Z]+/g, "")
 
-      // REMOVE CARACTERES INVISÍVEIS
-      .replace(/[^\x00-\x7F]/g, "")
+      // 💥 limpa espaços quebrados
+      .replace(/\s+/g, " ")
 
-      // REMOVE QUEBRAS
-      .replace(/\n/g, "")
-      .replace(/\r/g, "")
+      .trim()
   } 
   renderError={(error) => (
     <div style={{ color: '#ff4444', background: '#330000', padding: '10px', borderRadius: '8px', border: '1px solid red', marginTop: '10px' }}>
