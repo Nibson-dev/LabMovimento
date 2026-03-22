@@ -311,9 +311,26 @@ export default function App() {
                    <BlockMath 
   math={
     (step.equation_latex || "")
-      .replace(/\\t/g, "")   // remove \t
-      .replace(/\\n/g, "")   // remove \n
-      .replace(/\\r/g, "")   // remove \r
+      // remove caracteres invisíveis bizarros
+      .normalize("NFKD")
+
+      // remove qualquer \comando inválido tipo \t, \s, etc
+      .replace(/\\[a-zA-Z]+(?=[^a-zA-Z])/g, (match) => {
+        const allowed = [
+          "\\sin", "\\cos", "\\tan",
+          "\\cdot", "\\theta",
+          "\\frac", "\\sqrt",
+          "\\left", "\\right"
+        ];
+        return allowed.includes(match) ? match : "";
+      })
+
+      // remove lixo geral
+      .replace(/[^\x00-\x7F]/g, "") 
+
+      // remove quebras
+      .replace(/\n/g, "")
+      .replace(/\r/g, "")
   } 
   renderError={(error) => (
     <div style={{ color: '#ff4444', background: '#330000', padding: '10px', borderRadius: '8px', border: '1px solid red', marginTop: '10px' }}>
