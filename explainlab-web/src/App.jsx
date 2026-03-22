@@ -310,8 +310,8 @@ export default function App() {
                   <div style={{ marginLeft: '34px', background: '#050505', padding: '16px', borderRadius: '10px', border: '1px solid #222' }}>
                     <BlockMath 
   math={step.equation_latex} 
-  errorColor={'#ff0000'}
-  settings={{ strict: false, trust: true }} 
+  errorColor={'#ff0000'} 
+  renderError={(error) => <span style={{color: '#ff0000', fontSize: '12px'}}>Erro na fórmula: {step.equation_latex}</span>} 
 />
                   </div>
                 </div>
