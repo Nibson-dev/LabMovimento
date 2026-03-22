@@ -308,7 +308,11 @@ export default function App() {
                   </div>
                   <p style={{ fontSize: '13px', color: '#AAA', margin: '0 0 14px 34px' }}>{step.text}</p>
                   <div style={{ marginLeft: '34px', background: '#050505', padding: '16px', borderRadius: '10px', border: '1px solid #222' }}>
-                    <BlockMath math={step.equation_latex} />
+                    <BlockMath 
+  math={step.equation_latex} 
+  errorColor={'#ff0000'}
+  settings={{ strict: false, trust: true }} 
+/>
                   </div>
                 </div>
               ))}
