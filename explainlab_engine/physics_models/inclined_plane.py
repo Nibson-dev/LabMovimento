@@ -31,13 +31,13 @@ class InclinedPlane(BaseModel):
             {
                 "step": 1, "title": "Decomposição do Peso",
                 "text": f"O peso (P = mg = {weight:.2f}N) é decomposto nos eixos paralelo (Px) e perpendicular (Py/Normal) à rampa.",
-                # Usando rf"..." (Raw String) e \mathrm para as unidades
-                "equation_latex": rf"P_x = P \cdot \mathrm{{sen}}(\theta) = {px:.2f} \mathrm{{ N}} \quad | \quad N = P \cdot \cos(\theta) = {normal_force:.2f} \mathrm{{ N}}"
+                # ZERO \text ou \sin! Apenas física pura e blindada.
+                "equation_latex": rf"P_x = P \cdot sen(\theta) = {px:.2f} N \quad | \quad N = P \cdot cos(\theta) = {normal_force:.2f} N"
             },
             {
                 "step": 2, "title": "Análise do Atrito",
                 "text": f"Atrito Estático Máximo: {max_static_friction:.2f}N. {status_text}",
-                "equation_latex": rf"F_{{at}} = \mu N = {friction_force:.2f} \mathrm{{ N}}"
+                "equation_latex": rf"F_{{at}} = \mu \cdot N = {friction_force:.2f} N"
             }
         ]
         
@@ -45,7 +45,7 @@ class InclinedPlane(BaseModel):
             steps.append({
                 "step": 3, "title": "Segunda Lei de Newton",
                 "text": "Calculamos a força resultante e a aceleração do bloco.",
-                "equation_latex": rf"F_R = P_x - F_{{at}} = m \cdot a \Rightarrow {net_force:.2f} = {mass} \cdot a \Rightarrow a = {acceleration:.2f} \mathrm{{ m/s}}^2"
+                "equation_latex": rf"F_R = P_x - F_{{at}} = m \cdot a \Rightarrow a = {acceleration:.2f} m/s^2"
             })
 
         ramp_length = 15.0
