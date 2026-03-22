@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
 # Importando os 4 modelos
 from explainlab_engine.physics_models.vertical_motion import VerticalMotion
 from explainlab_engine.physics_models.inclined_plane import InclinedPlane
@@ -10,7 +11,11 @@ from explainlab_engine.physics_models.horizontal_mruv import HorizontalMRUV
 app = FastAPI()
 
 app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
+    CORSMiddleware, 
+    allow_origins=["*"], 
+    allow_credentials=True, 
+    allow_methods=["*"], 
+    allow_headers=["*"],
 )
 
 class SimulationRequest(BaseModel):
@@ -29,7 +34,9 @@ models = {
 async def simulate(request: SimulationRequest):
     if request.model_type not in models:
         raise HTTPException(status_code=400, detail="Modelo físico não encontrado.")
+    
     model = models[request.model_type]
+    
     try:
         result = model.solve(**request.parameters)
         return result
