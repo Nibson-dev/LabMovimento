@@ -1,8 +1,12 @@
 import math
 from typing import Dict, Any
-from .base_model import BaseModel
 
-class InclinedPlane(BaseModel):
+class InclinedPlane:
+    """
+    Simulação de plano inclinado com atrito.
+    Gera equações LaTeX 100% compatíveis com KaTeX usando matemática pura.
+    """
+    
     def solve(
         self, 
         mass: float, 
@@ -34,18 +38,19 @@ class InclinedPlane(BaseModel):
             status_text = "A componente Px não supera o atrito estático. O bloco permanece em repouso."
         
         # ========== EQUAÇÕES PURAS E BLINDADAS ==========
-        # Usando 'r' (Raw String) e espaços normais. Zero SymPy, Zero Conversor.
+        # Usando apenas matemática pura. ZERO palavras, ZERO \text ou \mathrm.
+        # Usamos \, para dar um pequeno espaço antes das unidades (N e m/s^2).
         
-        eq1_text = rf"P = {weight:.2f}\text{{ N}} \quad P_x = {px:.2f}\text{{ N}} \quad N = {normal_force:.2f}\text{{ N}}"
+        eq1_text = rf"P = {weight:.2f}\,N \quad P_x = {px:.2f}\,N \quad N = {normal_force:.2f}\,N"
         
-        eq2_text = rf"F_{{at,max}} = \mu_s \cdot N = {mu_s_val} \cdot {normal_force:.2f} = {max_static_friction:.2f}\text{{ N}}"
+        eq2_text = rf"F_{{at,max}} = \mu_s \cdot N = {mu_s_val} \cdot {normal_force:.2f} = {max_static_friction:.2f}\,N"
         
         if is_moving:
-            eq3_text = rf"P_x > F_{{at,max}} \quad ({px:.2f} > {max_static_friction:.2f}) \quad \Rightarrow \text{{ Bloco se move}}"
-            eq4_text = rf"a = \frac{{P_x - F_{{at}}}}{{m}} = \frac{{{px:.2f} - {friction_force:.2f}}}{{{mass}}} = {acceleration:.2f}\text{{ m/s}}^2"
+            eq3_text = rf"P_x > F_{{at,max}} \quad \Rightarrow \quad {px:.2f} > {max_static_friction:.2f}"
+            eq4_text = rf"a = \frac{{P_x - F_{{at}}}}{{m}} = \frac{{{px:.2f} - {friction_force:.2f}}}{{{mass}}} = {acceleration:.2f}\,m/s^2"
         else:
-            eq3_text = rf"P_x \leq F_{{at,max}} \quad ({px:.2f} \leq {max_static_friction:.2f}) \quad \Rightarrow \text{{ Bloco travado}}"
-            eq4_text = rf"a = 0\text{{ m/s}}^2 \quad \text{{(bloco em repouso)}}"
+            eq3_text = rf"P_x \leq F_{{at,max}} \quad \Rightarrow \quad {px:.2f} \leq {max_static_friction:.2f}"
+            eq4_text = rf"a = 0\,m/s^2"
         
         # ========== BUILD STEPS ==========
         steps = [
@@ -73,7 +78,7 @@ class InclinedPlane(BaseModel):
             steps.append({
                 "step": 4,
                 "title": "Segunda Lei de Newton",
-                "text": "Como Px > Fatrito_max, o bloco se move com aceleração constante.",
+                "text": "Como a força de descida supera o atrito, o bloco acelera.",
                 "equation_latex": eq4_text  
             })
         
