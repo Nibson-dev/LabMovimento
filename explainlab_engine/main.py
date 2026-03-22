@@ -2,10 +2,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 # Importando os 4 modelos
-from .physics_models.vertical_motion import VerticalMotion
-from .physics_models.inclined_plane import InclinedPlane
-from .physics_models.projectile_motion import ProjectileMotion
-from .physics_models.horizontal_mruv import HorizontalMRUV
+from explainlab_engine.physics_models.vertical_motion import VerticalMotion
+from explainlab_engine.physics_models.inclined_plane import InclinedPlane
+from explainlab_engine.physics_models.projectile_motion import ProjectileMotion
+from explainlab_engine.physics_models.horizontal_mruv import HorizontalMRUV
 
 app = FastAPI()
 
