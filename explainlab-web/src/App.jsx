@@ -44,11 +44,19 @@ const VectorLegend = ({ show, activeModel, hasFriction }) => {
 };
 
 export default function App() {
-  // Lógica de Responsividade: Detecta se é celular para iniciar com os painéis fechados
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  
+  // EFEITO PARA FORÇAR CARREGAMENTO DO KATEX NO DEPLOY
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
+    
+    // Injeção dinâmica do CSS do KaTeX
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css';
+    document.head.appendChild(link);
+    
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -57,17 +65,13 @@ export default function App() {
   const [useGhost, setUseGhost] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeModel, setActiveModel] = useState('inclined_plane'); 
-  
-  // Painéis começam fechados no celular
   const [leftHudOpen, setLeftHudOpen] = useState(!isMobile);
   const [rightHudOpen, setRightHudOpen] = useState(!isMobile);
-  
   const [gravity, setGravity] = useState(9.8);
   const [y0, setY0] = useState(0); const [v0, setV0] = useState(20); 
   const [s0, setS0] = useState(0); const [a, setA] = useState(-2); 
   const [mass, setMass] = useState(10); const [angle, setAngle] = useState(30); 
   const [muStatic, setMuStatic] = useState(0.5); const [muKinetic, setMuKinetic] = useState(0.3); 
-  
   const [playbackSpeed, setPlaybackSpeed] = useState(1); 
   const [manualProgress, setManualProgress] = useState(0); 
   const [showVectors, setShowVectors] = useState(true);
@@ -85,7 +89,7 @@ export default function App() {
     link.download = `explainlab-${activeModel}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    toast.success('Screenshot salva com sucesso!', { icon: '📸', style: { background: '#333', color: '#fff' } });
+    toast.success('Screenshot salva com sucesso!', { icon: '📸' });
   };
 
   const fetchSimulation = async () => {
@@ -107,12 +111,12 @@ export default function App() {
       const response = await axios.post('https://labengine.onrender.com/api/simulate', { model_type: activeModel, parameters: params });
       setData(response.data);
       setPlaybackSpeed(1);
-      if (!isMobile) setRightHudOpen(true); // Abre fórmulas sozinho apenas se for PC
-      if (isMobile) setLeftHudOpen(false); // Esconde painel no mobile para focar no 3D
-      toast.success('Física computada!', { icon: '🚀', style: { background: '#0a0a0a', color: THEME.accent, border: `1px solid ${THEME.accent}` } });
+      if (!isMobile) setRightHudOpen(true); 
+      if (isMobile) setLeftHudOpen(false); 
+      toast.success('Física computada!', { icon: '🚀' });
     } catch (e) { 
       console.error("Erro:", e); 
-      toast.error('Erro no servidor Python!', { style: { background: '#333', color: '#fff' }});
+      toast.error('Erro no servidor!');
     } 
     setLoading(false);
   };
@@ -141,8 +145,8 @@ export default function App() {
       switch(activeModel) {
           case 'inclined_plane': return (<><div style={{...styleItem, background: phys.is_moving ? THEME.velocidade : THEME.atrito, color:'#000'}}>STATUS: {phys.is_moving ? "DESCENDO" : "TRAVADO"}</div><div style={styleItem}><span>Aceleração:</span><span style={styleVal}>{phys.acceleration_m_s2} m/s²</span></div></>);
           case 'vertical_motion': return (<><div style={styleItem}><span>Ápice (H_max):</span><span style={{...styleVal, color:THEME.descida}}>{data.simulation_data.max_height_m}m</span></div><div style={styleItem}><span>Tempo Total:</span><span style={styleVal}>{data.simulation_data.flight_time_s}s</span></div></>);
-          case 'projectile_motion': return (<><div style={styleItem}><span>Alcance (R):</span><span style={{...styleVal, color:THEME.accent}}>{metrics.range_m}m</span></div><div style={styleItem}><span>Ápice (H_max):</span><span style={{...styleVal, color:THEME.descida}}>{metrics.h_max_m}m</span></div><div style={styleItem}><span>Tempo de Voo:</span><span style={styleVal}>{metrics.flight_time_s}s</span></div><div style={styleItem}><span style={{color:THEME.vx}}>v0x (MRU):</span><span style={styleVal}>{metrics.v0x_m_s}m/s</span></div><div style={styleItem}><span style={{color:THEME.vy}}>v0y (MRUV):</span><span style={styleVal}>{metrics.v0y_m_s}m/s</span></div></>);
-          case 'horizontal_mruv': return (<><div style={styleItem}><span>Vai Parar/Inverter?</span><span style={{...styleVal, color: metrics.will_stop ? THEME.aceleracao : THEME.velocidade}}>{metrics.will_stop ? "SIM" : "NÃO (Acel. Contínua)"}</span></div>{metrics.will_stop && <div style={styleItem}><span>Ponto de Inversão:</span><span style={styleVal}>{metrics.stop_pos_m}m (t={metrics.stop_time_s}s)</span></div>}</>);
+          case 'projectile_motion': return (<><div style={styleItem}><span>Alcance (R):</span><span style={{...styleVal, color:THEME.accent}}>{metrics.range_m}m</span></div><div style={styleItem}><span>Ápice (H_max):</span><span style={{...styleVal, color:THEME.descida}}>{metrics.h_max_m}m</span></div><div style={styleItem}><span>Tempo de Voo:</span><span style={styleVal}>{metrics.flight_time_s}s</span></div><div style={styleItem}><span style={{color:THEME.vx}}>v0x:</span><span style={styleVal}>{metrics.v0x_m_s}m/s</span></div><div style={styleItem}><span style={{color:THEME.vy}}>v0y:</span><span style={styleVal}>{metrics.v0y_m_s}m/s</span></div></>);
+          case 'horizontal_mruv': return (<><div style={styleItem}><span>Vai Parar?</span><span style={{...styleVal, color: metrics.will_stop ? THEME.aceleracao : THEME.velocidade}}>{metrics.will_stop ? "SIM" : "NÃO"}</span></div>{metrics.will_stop && <div style={styleItem}><span>Inversão:</span><span style={styleVal}>{metrics.stop_pos_m}m</span></div>}</>);
           default: return null;
       }
   }
@@ -153,10 +157,12 @@ export default function App() {
       <style>{`
         body, html, #root { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; font-family: 'Inter', sans-serif; } 
         * { box-sizing: border-box; } 
-        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; } 
-        input[type=number] { outline: none; transition: border-color 0.2s; } input[type=number]:focus { border-color: ${THEME.accent} !important; }
         
-        /* ESTILOS BASE DOS PAINÉIS */
+        /* CORREÇÃO DO KATEX (FÓRMULAS) */
+        .katex-display { margin: 12px 0; overflow-x: auto; color: #00e5ff !important; }
+        .katex { color: white !important; font-size: 1.1em !important; }
+        .katex .base { margin: 4px 0; }
+
         .hud-panel {
           position: absolute;
           background-color: rgba(5, 5, 5, 0.75);
@@ -174,35 +180,23 @@ export default function App() {
         .hud-right { top: 24px; right: 24px; bottom: 24px; width: 420px; padding: 28px; display: flex; flex-direction: column; overflow-y: auto; transform: ${rightHudOpen ? 'translateX(0)' : 'translateX(120%)'}; opacity: ${rightHudOpen ? 1 : 0}; pointer-events: ${rightHudOpen ? 'auto' : 'none'}; }
         
         .float-btn { position: absolute; top: 24px; z-index: 101; background: rgba(10,10,10,0.8); backdrop-filter: blur(10px); border: 1px solid #333; color: ${THEME.accent}; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.2s ease; }
-        .float-btn:hover { background: #222 !important; border-color: ${THEME.accent} !important; }
-        
         .top-buttons { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 100; }
-        .energy-hud { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 24px; background: rgba(5,5,5,0.85); padding: 16px 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); z-index: 90; backdrop-filter: blur(24px); transition: all 0.3s ease; }
+        .energy-hud { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 24px; background: rgba(5,5,5,0.85); padding: 16px 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); z-index: 90; backdrop-filter: blur(24px); }
         .bar-container { width: 12px; height: 60px; background: #222; border-radius: 6px; display: flex; align-items: flex-end; overflow: hidden; }
         .bar-fill { width: 100%; transition: height 0.05s linear; }
         .energy-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 
-        /* MÁGICA MOBILE AQUI */
         @media (max-width: 768px) {
-          .hud-left, .hud-right {
-            width: calc(100vw - 32px);
-            left: 16px;
-            right: 16px;
-            top: 70px;
-            max-height: calc(100vh - 160px);
-          }
+          .hud-left, .hud-right { width: calc(100vw - 32px); left: 16px; right: 16px; top: 70px; max-height: calc(100vh - 160px); }
           .top-buttons { top: 10px; width: 100%; justify-content: center; transform: none; left: 0; padding: 0 10px; box-sizing: border-box; }
-          .top-buttons button { flex: 1; font-size: 11px; padding: 8px; }
           .float-btn { top: auto; bottom: 24px; font-size: 12px; padding: 8px 12px; }
           .float-btn.left { left: 16px; }
           .float-btn.right { right: 16px; }
           .energy-hud { bottom: 80px; transform: translateX(-50%) scale(0.8); }
-          .vector-legend { display: none; } /* Esconde a legenda no celular pra salvar espaço */
         }
       `}</style>
       
       <div style={{ position: 'fixed', inset: 0, color: '#EDEDED' }}>
-        
         <Canvas shadows gl={{ antialias: true, toneMapping: THREE.ReinhardToneMapping, preserveDrawingBuffer: true }} camera={{ position: [0, 10, 40], fov: 45 }} dpr={[1, 1.5]}>
           <Scene3D 
             simData={data ? data.simulation_data : null} 
@@ -218,34 +212,31 @@ export default function App() {
           />
         </Canvas>
 
-        {/* BOTOES TOPO */}
         <div className="top-buttons">
            <button onClick={() => setViewMode(prev => prev === '3D' ? '2D' : '3D')} style={{ background: 'rgba(10,10,10,0.8)', border: `1px solid ${THEME.accent}`, color: THEME.accent, borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', backdropFilter: 'blur(10px)' }}>
-             {viewMode === '3D' ? '🎥 3D Livre' : '📐 2D Lousa'}
+             {viewMode === '3D' ? '🎥 3D' : '📐 2D'}
            </button>
            <button onClick={takeScreenshot} style={{ background: 'rgba(10,10,10,0.8)', border: '1px solid #444', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', backdropFilter: 'blur(10px)' }}>
-             📸 Salvar Foto
+             📸 Foto
            </button>
         </div>
 
-        {/* FLOAT BUTTONS */}
         {!leftHudOpen && (
           <button className="float-btn left" onClick={() => { setLeftHudOpen(true); if(isMobile) setRightHudOpen(false); }}>
             ⚙️ Controles
           </button>
         )}
         
-        {/* HUD ESQUERDA */}
         <div className="hud-panel hud-left">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: `linear-gradient(135deg, ${THEME.accent}, ${THEME.descida})`, boxShadow: `0 0 15px ${THEME.accent}` }}></div>
-              <h1 style={{ fontSize: '18px', margin: 0, color: '#FFF', fontWeight: '800', letterSpacing: '-0.5px' }}>ExplainLab Pro</h1>
+              <h1 style={{ fontSize: '18px', margin: 0, color: '#FFF', fontWeight: '800' }}>ExplainLab Pro</h1>
             </div>
             <button onClick={() => setLeftHudOpen(false)} style={closeBtnStyle}>✕</button>
           </div>
           
-          <select value={activeModel} onChange={e => {setActiveModel(e.target.value); clearSimulation();}} style={{ width: '100%', padding: '12px', background: 'rgba(0,0,0,0.5)', color: '#FFF', border: '1px solid #333', borderRadius: '8px', outline: 'none', cursor: 'pointer', fontWeight: '600', textTransform: 'uppercase' }}>
+          <select value={activeModel} onChange={e => {setActiveModel(e.target.value); clearSimulation();}} style={{ width: '100%', padding: '12px', background: 'rgba(0,0,0,0.5)', color: '#FFF', border: '1px solid #333', borderRadius: '8px', outline: 'none' }}>
             <option value="inclined_plane">📐 Rampa com Atrito</option>
             <option value="projectile_motion">🏹 Lançamento Oblíquo</option>
             <option value="horizontal_mruv">🚗 MRUV Horizontal</option>
@@ -254,38 +245,29 @@ export default function App() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>{renderInputs()}</div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background:'rgba(255,255,255,0.03)', padding:'10px', borderRadius:'8px' }}>
-            <input type="checkbox" checked={useGhost} onChange={e => setUseGhost(e.target.checked)} style={{ accentColor: THEME.accent }} />
-            <div>
-              <label style={{ fontSize: '12px', color: '#FFF', fontWeight: 'bold', display: 'block' }}>👻 Modo Fantasma</label>
-            </div>
-          </div>
-
-          <button onClick={fetchSimulation} disabled={loading} style={{ width: '100%', padding: '14px', background: `linear-gradient(90deg, ${THEME.accent}, ${THEME.normal})`, color: '#000', borderRadius: '8px', fontWeight: '800', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: `0 4px 20px ${THEME.accent}40` }}>
+          <button onClick={fetchSimulation} disabled={loading} style={{ width: '100%', padding: '14px', background: `linear-gradient(90deg, ${THEME.accent}, ${THEME.normal})`, color: '#000', borderRadius: '8px', fontWeight: '800', border: 'none', cursor: 'pointer' }}>
             {loading ? "CALCULANDO..." : "SIMULAR FÍSICA"}
           </button>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background:'rgba(255,255,255,0.03)', padding:'12px', borderRadius:'8px' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <button onClick={() => setPlaybackSpeed(prev => prev === 0 ? 1 : 0)} style={{ padding: '6px 10px', background: playbackSpeed === 0 ? THEME.atrito : '#222', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '10px', fontWeight: '700' }}>
-                  {playbackSpeed === 0 ? '▶ PLAY' : '❚❚ PAUSE'}
+                <button onClick={() => setPlaybackSpeed(prev => prev === 0 ? 1 : 0)} style={{ padding: '6px 10px', background: playbackSpeed === 0 ? THEME.atrito : '#222', color: '#FFF', border: 'none', borderRadius: '6px' }}>
+                  {playbackSpeed === 0 ? '▶' : '❚❚'}
                 </button>
-                <span style={{ fontSize: '10px', color: '#888' }}>{playbackSpeed === 0 ? "Modo Manual" : "Auto-Play"}</span>
+                <span style={{ fontSize: '10px', color: '#888' }}>{playbackSpeed === 0 ? "Manual" : "Auto"}</span>
              </div>
-             <input type="range" min="0" max="1" step="0.01" value={playbackSpeed === 0 ? manualProgress : 1} onChange={e => { setPlaybackSpeed(0); setManualProgress(parseFloat(e.target.value)); }} style={{ width: '100%', accentColor: THEME.accent, opacity: playbackSpeed === 0 ? 1 : 0.3 }} disabled={!data && playbackSpeed > 0} />
+             <input type="range" min="0" max="1" step="0.01" value={playbackSpeed === 0 ? manualProgress : 1} onChange={e => { setPlaybackSpeed(0); setManualProgress(parseFloat(e.target.value)); }} style={{ width: '100%', accentColor: THEME.accent }} />
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><input type="checkbox" checked={showVectors} onChange={e => setShowVectors(e.target.checked)} style={{ accentColor: THEME.accent }} /><label style={{ fontSize: '12px', color: '#CCC', fontWeight: '500' }}>Vetores 3D</label></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><input type="checkbox" checked={showVectors} onChange={e => setShowVectors(e.target.checked)} /><label style={{ fontSize: '12px', color: '#CCC' }}>Vetores 3D</label></div>
 
           {data && (
             <div style={{ marginTop: '10px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-              <h3 style={{ fontSize: '10px', color: THEME.accent, textTransform: 'uppercase', margin: '0 0 12px 0', letterSpacing: '2px', fontWeight: '800' }}>Telemetria</h3>
               <div style={{ fontSize: '12px', color: '#DDD', display: 'flex', flexDirection: 'column', gap: '6px' }}>{renderMetrics()}</div>
             </div>
           )}
         </div>
 
-        {/* HUD ENERGIA */}
         {data && (
           <div className="energy-hud">
              <div className="energy-col">
@@ -305,7 +287,6 @@ export default function App() {
           </div>
         )}
 
-        {/* HUD DIREITA */}
         {data && !rightHudOpen && (
           <button className="float-btn right" onClick={() => { setRightHudOpen(true); if(isMobile) setLeftHudOpen(false); }}>
             ∑ Fórmulas
@@ -315,7 +296,7 @@ export default function App() {
         {data && (
           <div className="hud-panel hud-right">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '14px', color: '#888', textTransform: 'uppercase', margin: 0, letterSpacing: '2px', fontWeight: '800' }}>Engenharia Reversa</h2>
+              <h2 style={{ fontSize: '14px', color: '#888', textTransform: 'uppercase', margin: 0 }}>Engenharia Reversa</h2>
               <button onClick={() => setRightHudOpen(false)} style={closeBtnStyle}>✕</button>
             </div>
             <div style={{ flex: 1 }}>
@@ -323,10 +304,12 @@ export default function App() {
                 <div key={step.step} style={{ marginBottom: '28px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                     <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(0,229,255,0.1)', color: THEME.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{step.step}</div>
-                    <h4 style={{ fontSize: '14px', color: '#FFF', margin: 0, fontWeight: '600' }}>{step.title}</h4>
+                    <h4 style={{ fontSize: '14px', color: '#FFF', margin: 0 }}>{step.title}</h4>
                   </div>
-                  <p style={{ fontSize: '13px', color: '#AAA', margin: '0 0 14px 34px', lineHeight: '1.5' }}>{step.text}</p>
-                  <div style={{ marginLeft: '34px', background: '#050505', padding: '16px', borderRadius: '10px', border: '1px solid #222', overflowX: 'auto', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5)' }}><BlockMath math={step.equation_latex} /></div>
+                  <p style={{ fontSize: '13px', color: '#AAA', margin: '0 0 14px 34px' }}>{step.text}</p>
+                  <div style={{ marginLeft: '34px', background: '#050505', padding: '16px', borderRadius: '10px', border: '1px solid #222' }}>
+                    <BlockMath math={step.equation_latex} />
+                  </div>
                 </div>
               ))}
             </div>
