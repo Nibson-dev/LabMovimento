@@ -26,11 +26,12 @@ class InclinedPlane(BaseModel):
             acceleration = 0.0
             status_text = "A componente Px nao supera o atrito estatico. O bloco permanece em repouso."
 
-        # 🚀 LaTeX 100% seguro com format()
-        eq1 = "render_atualizou"
-        eq2 = "F_{{at}} = \\mu \\cdot N = {:.2f}\\,\\mathrm{{N}}".format(friction_force)
+        # 🚀 LaTeX 100% SAFE (sem símbolos gregos)
+        eq1 = "P_x = P \\cdot \\sin(\\theta) = {:.2f}\\,\\mathrm{{N}} \\quad N = P \\cdot \\cos(\\theta) = {:.2f}\\,\\mathrm{{N}}".format(px, normal_force)
         
-        eq3 = "F_R = P_x - F_{{at}} = m \\cdot a \\Rightarrow a = {:.2f}\\,\\mathrm{{m/s^2}}".format(acceleration)
+        eq2 = "F_{at} = mu \\cdot N = {:.2f}\\,\\mathrm{{N}}".format(friction_force)
+        
+        eq3 = "F_R = P_x - F_{at} = m \\cdot a \\Rightarrow a = {:.2f}\\,\\mathrm{{m/s^2}}".format(acceleration)
 
         steps = [
             {
