@@ -1,0 +1,101 @@
+from typing import Dict, Any
+import sympy as sp
+import numpy as np
+from .base_model import BasePhysicsModel
+
+
+class MRUV(BasePhysicsModel):
+    """
+    Modelo de Movimento Retilíneo Uniformemente Variado (MRUV).
+    
+    Parâmetros esperados:
+    - s0 (float): Posição inicial em metros
+    - v0 (float): Velocidade inicial em m/s
+    - a (float): Aceleração em m/s²
+    - t_final (float): Tempo final da simulação em segundos
+    """
+
+    def __init__(self, parameters: Dict[str, Any]):
+        super().__init__(parameters)
+        self.model_name = "MRUV"
+        
+        self.s0 = parameters.get('s0', 0.0)
+        self.v0 = parameters.get('v0', 0.0)
+        self.a = parameters.get('a', 1.0)
+        self.t_final = parameters.get('t_final', 5.0)
+        
+        self.t = sp.Symbol('t', real=True, positive=True)
+
+    def validate_parameters(self) -> bool:
+        """Valida os parâmetros do modelo."""
+        if self.t_final <= 0:
+            self.errors.append("Tempo final deve ser positivo")
+            return False
+        
+        return True
+
+    def solve(self) -> Dict[str, Any]:
+        """
+        Resolve o problema de MRUV.
+        """
+        
+        if not self.validate_parameters():
+            return {
+                "model_detected": self.model_name,
+                "errors": self.errors,
+                "explanation_steps": [],
+                "simulation_data": {}
+            }
+        
+        # ==================== PASSO 1: Identificação ====================
+        self._add_step(
+            step_number=1,
+            title="Identificação do Modelo",
+            text="Movimento com aceleração constante.",
+            equation_latex=r"s(t) = s_0 + v_0 t + \frac{1}{2}at^2"
+        )
+
+        # ==================== PASSO 2: Equação Simbólica ====================
+        s_general = self.s0 + self.v0 * self.t + sp.Rational(1, 2) * self.a * self.t**2
+        s_general_latex = sp.latex(s_general)
+        
+        self._add_step(
+            step_number=2,
+            title="Substituição de Valores",
+            text=f"Substituindo s₀ = {self.s0}, v₀ = {self.v0}, a = {self.a}",
+            equation_latex=s_general_latex
+        )
+
+        # ==================== PASSO 3: Velocidade ====================
+        v_t = sp.diff(s_general, self.t)
+        v_t_latex = sp.latex(v_t)
+        
+        self._add_step(
+            step_number=3,
+            title="Equação Horária da Velocidade",
+            text="Derivando a posição",
+            equation_latex=v_t_latex
+        )
+
+        # ==================== DADOS DE SIMULAÇÃO ====================
+        self._generate_simulation_data(s_general, v_t)
+
+        return self._build_output(self.model_name)
+
+    def _generate_simulation_data(self, s_general, v_t) -> None:
+        """Gera dados numéricos para gráficos."""
+        
+        t_final = self.t_final
+        time_array = np.linspace(0, t_final, 50)
+        
+        s_func = sp.lambdify(self.t, s_general, 'numpy')
+        v_func = sp.lambdify(self.t, v_t, 'numpy')
+        
+        position_array = s_func(time_array)
+        velocity_array = v_func(time_array)
+        
+        self.simulation_data = {
+            "time_array": time_array.tolist(),
+            "position_array": position_array.tolist(),
+            "velocity_array": velocity_array.tolist()
+        }
