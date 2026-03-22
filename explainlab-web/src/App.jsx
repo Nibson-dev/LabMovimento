@@ -105,7 +105,7 @@ export default function App() {
     else if (activeModel === 'horizontal_mruv') params = { s0: parseFloat(s0), v0: parseFloat(v0), a: parseFloat(a) };
 
     try {
-      const response = await axios.post('https://labengine.onrender.com', { model_type: activeModel, parameters: params });
+      const response = await axios.post('https://labengine.onrender.com/api/simulate', { model_type: activeModel, parameters: params });
       setData(response.data);
       setPlaybackSpeed(1);
       if (!isMobile) setRightHudOpen(true); // Abre fórmulas sozinho apenas se for PC
