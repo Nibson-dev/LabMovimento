@@ -2,6 +2,7 @@ from typing import Dict, Any
 import sympy as sp
 import numpy as np
 from .base_model import BasePhysicsModel
+from explainlab_engine.utils.latex_converter import sympy_to_katex, create_safe_equation
 
 class MRUV(BasePhysicsModel):
     def __init__(self, parameters: Dict[str, Any]):

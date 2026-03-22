@@ -20,7 +20,6 @@ Uso:
 import math
 from typing import Dict, List, Any
 from explainlab_engine.utils.latex_converter import sympy_to_katex, create_safe_equation
-
 class InclinedPlane:
     """
     Simulação de plano inclinado com atrito.

@@ -1,6 +1,7 @@
 import sympy as sp
 from .base_model import BaseModel
 import math
+from explainlab_engine.utils.latex_converter import sympy_to_katex, create_safe_equation
 
 class ProjectileMotion(BaseModel):
     def solve(self, v0, angle_deg, gravity=9.8):

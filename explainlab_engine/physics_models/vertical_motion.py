@@ -1,6 +1,7 @@
 import sympy as sp
 from .base_model import BaseModel
 import math
+from explainlab_engine.utils.latex_converter import sympy_to_katex, create_safe_equation
 
 class VerticalMotion(BaseModel):
     def solve(self, y0, v0, gravity=9.8):

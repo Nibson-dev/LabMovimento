@@ -1,5 +1,6 @@
 import sympy as sp
 from .base_model import BaseModel
+from explainlab_engine.utils.latex_converter import sympy_to_katex, create_safe_equation
 
 class HorizontalMRUV(BaseModel):
     def solve(self, s0, v0, a):
